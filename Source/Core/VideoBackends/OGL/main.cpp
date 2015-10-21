@@ -162,6 +162,16 @@ bool VideoBackend::Initialize(void *window_handle)
 	return true;
 }
 
+int dumpframestate = 0;
+FILE *dumpframefile = 0;
+int dumpframecount = 0;
+
+void VideoBackend::Video_DumpFrame()
+{
+	printf("Video_DumpFrame!\n");
+	if(dumpframestate==0) dumpframestate = 2;
+}
+
 // This is called after Initialize() from the Core
 // Run from the graphics thread
 void VideoBackend::Video_Prepare()

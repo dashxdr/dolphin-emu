@@ -29,6 +29,7 @@ void cInterfaceWGL::SwapInterval(int Interval)
 }
 void cInterfaceWGL::Swap()
 {
+printf("WGL.cpp Swap()---------------------------------------\n");
 	SwapBuffers(hDC);
 }
 

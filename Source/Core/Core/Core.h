@@ -43,6 +43,8 @@ void Shutdown();
 
 std::string StopMessage(bool, const std::string&);
 
+void Video_DumpFrame();
+
 bool IsRunning();
 bool IsRunningAndStarted(); // is running and the CPU loop has been entered
 bool IsRunningInCurrentThread(); // this tells us whether we are running in the CPU thread.

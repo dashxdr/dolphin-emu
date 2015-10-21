@@ -76,6 +76,7 @@ public:
 
 	virtual void ShowConfig(void*) = 0;
 
+	virtual void Video_DumpFrame() {}
 	virtual void Video_Prepare() = 0;
 	virtual void Video_EnterLoop() = 0;
 	virtual void Video_ExitLoop() = 0;

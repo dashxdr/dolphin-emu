@@ -41,6 +41,7 @@ public:
 	}
 
 	const u32 m_buffer;
+	u32 Get_m_iterator(void) {return m_iterator;}
 
 protected:
 	StreamBuffer(u32 type, u32 size);

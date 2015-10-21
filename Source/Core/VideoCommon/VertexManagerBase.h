@@ -65,6 +65,8 @@ protected:
 	static u8* s_pBaseBufferPointer;
 	static u8* s_pEndBufferPointer;
 
+	static u16* s_pIndexBufferPointer;
+
 	static u32 GetRemainingSize();
 	static u32 GetRemainingIndices(int primitive);
 

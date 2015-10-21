@@ -117,6 +117,7 @@ const std::string hotkey_labels[] =
 	_trans("Undo Save State"),
 	_trans("Save State"),
 	_trans("Load State"),
+	_trans("Dump Frame"),
 };
 
 const int num_hotkeys = (sizeof(hotkey_labels) / sizeof(hotkey_labels[0]));
@@ -317,4 +318,6 @@ void HotkeyManager::LoadDefaults(const ControllerInterface& ciface)
 	}
 	set_control(HK_UNDO_LOAD_STATE, NON + " & `F12`");
 	set_control(HK_UNDO_SAVE_STATE, SHIFT + " & `F12`");
+
+	set_control(HK_DUMP_FRAME, SHIFT + " & T");
 }

@@ -18,6 +18,7 @@ class VideoBackend : public VideoBackendHardware
 	std::string GetName() const override;
 	std::string GetDisplayName() const override;
 
+	void Video_DumpFrame();// override;
 	void Video_Prepare() override;
 	void Video_Cleanup() override;
 

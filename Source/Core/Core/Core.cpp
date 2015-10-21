@@ -161,6 +161,11 @@ void DisplayMessage(const std::string& message, int time_in_ms)
 	Host_UpdateTitle(message);
 }
 
+void Video_DumpFrame()
+{
+	g_video_backend->Video_DumpFrame();
+}
+
 bool IsRunning()
 {
 	return (GetState() != CORE_UNINITIALIZED || s_hardware_initialized) && !s_is_stopping;

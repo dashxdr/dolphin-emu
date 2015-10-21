@@ -1019,6 +1019,7 @@ int GetCmdForHotkey(unsigned int key)
 	case HK_FREELOOK_ZOOM_IN: return IDM_FREELOOK_ZOOM_IN;
 	case HK_FREELOOK_ZOOM_OUT: return IDM_FREELOOK_ZOOM_OUT;
 	case HK_FREELOOK_RESET: return IDM_FREELOOK_RESET;
+	case HK_DUMP_FRAME: return IDM_DUMP_FRAME;
 	}
 
 	return -1;
@@ -1486,4 +1487,7 @@ void CFrame::ParseHotkeys()
 		State::UndoLoadState();
 	if (IsHotkey(HK_UNDO_SAVE_STATE))
 		State::UndoSaveState();
+
+	if (IsHotkey(HK_DUMP_FRAME))
+		Core::Video_DumpFrame();
 }

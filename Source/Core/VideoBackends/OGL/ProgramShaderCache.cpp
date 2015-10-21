@@ -218,7 +218,7 @@ SHADER* ProgramShaderCache::SetShader(DSTALPHA_MODE dstAlphaMode, u32 components
 	{
 		newentry.shader.strvprog = vcode.GetBuffer();
 		newentry.shader.strpprog = pcode.GetBuffer();
-		newentry.shader.strgprog = gcode.GetBuffer();
+//		newentry.shader.strgprog = gcode.GetBuffer();
 	}
 
 #if defined(_DEBUG) || defined(DEBUGFAST)
@@ -238,7 +238,6 @@ SHADER* ProgramShaderCache::SetShader(DSTALPHA_MODE dstAlphaMode, u32 components
 		}
 	}
 #endif
-
 	if (!CompileShader(newentry.shader, vcode.GetBuffer(), pcode.GetBuffer(), gcode.GetBuffer()))
 	{
 		GFX_DEBUGGER_PAUSE_AT(NEXT_ERROR, true);

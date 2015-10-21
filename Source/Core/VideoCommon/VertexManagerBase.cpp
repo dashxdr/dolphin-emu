@@ -27,6 +27,7 @@ VertexManager *g_vertex_manager;
 u8 *VertexManager::s_pCurBufferPointer;
 u8 *VertexManager::s_pBaseBufferPointer;
 u8 *VertexManager::s_pEndBufferPointer;
+u16 *VertexManager::s_pIndexBufferPointer;
 
 PrimitiveType VertexManager::current_primitive_type;
 
