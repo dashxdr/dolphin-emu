@@ -171,8 +171,9 @@ void VertexManager::Draw(u32 stride)
 	if(dumpframestate==1)
 	{
 		write4c("draw");
-		write32(4);
+		write32(8);
 		write32(primitive_mode);
+		write32(currentshaderid);
 		writepad();
 	}
 	if (g_ogl_config.bSupportsGLBaseVertex)

@@ -1691,24 +1691,7 @@ void Renderer::SwapImpl(u32 xfbAddr, u32 fbWidth, u32 fbStride, u32 fbHeight, co
 	// Copy the rendered frame to the real window
 	GLInterface->Swap();
 
-	if(dumpframestate > 0)
-	{
-		--dumpframestate;
-		if(dumpframestate == 1)
-		{
-			dumpframeconstants=1;
-			char tempname[64];
-			snprintf(tempname, sizeof(tempname), "/tmp/dumpframe%04d.bin",
-				dumpframecount++);
-			dumpframefile = fopen(tempname, "wb");
-			printf("Dumping frame to file %s\n", tempname);
-			write4c("Ddv0");
-		} else if(dumpframestate == 0)
-		{
-			fclose(dumpframefile);
-			dumpframefile = 0;
-		}
-	}
+	dumpframestart();
 
 	// Clear framebuffer
 	if (!DriverDetails::HasBug(DriverDetails::BUG_BROKENSWAP))

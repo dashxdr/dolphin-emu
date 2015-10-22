@@ -168,6 +168,8 @@ int dumpframestate = 0;
 int dumpframeconstants = 0;
 FILE *dumpframefile = 0;
 int dumpframecount = 0;
+int dumpedshadercount = 0;
+int currentshaderid = 0;
 void writepad(void)
 {
 	if(!dumpframefile) return;
@@ -188,6 +190,60 @@ void write4c(const char *s)
 	u32 v = (s[0]<<24) | (s[1]<<16) | (s[2]<<8) | s[3];
 	write32(v);
 }
+void dumpframestart(void)
+{
+	if(dumpframestate > 0)
+	{
+		--dumpframestate;
+		if(dumpframestate == 1)
+		{
+			dumpframeconstants=1;
+			dumpedshadercount=0;
+			char tempname[64];
+			snprintf(tempname, sizeof(tempname), "/tmp/dumpframe%04d.bin",
+				dumpframecount++);
+			dumpframefile = fopen(tempname, "wb");
+			printf("Dumping frame to file %s\n", tempname);
+			write4c("Ddv0");
+		} else if(dumpframestate == 0)
+		{
+			fclose(dumpframefile);
+			dumpframefile = 0;
+		}
+	}
+}
+
+#define MAXDUMPEDSHADERS 1024
+struct dumpedshaderinfo {
+	DSTALPHA_MODE dstAlphaMode;
+	u32 components;
+	u32 primitive_type;
+} dumpedshaders[MAXDUMPEDSHADERS];
+
+// returns 0 or 1 depending on whether it's a new entry.
+int dumpedshaderid(DSTALPHA_MODE dstAlphaMode, u32 components, u32 primitive_type)
+{
+	int i;
+	struct dumpedshaderinfo *d;
+	for(i=0;i<dumpedshadercount;++i)
+	{
+		d = dumpedshaders+i;
+		if(d->dstAlphaMode == dstAlphaMode && d->components == components && d->primitive_type==primitive_type)
+		{
+			currentshaderid = i;
+			return 0;
+		}
+	}
+	if(i==MAXDUMPEDSHADERS) return -1;
+	i = dumpedshadercount++;
+	currentshaderid = i;
+	d = dumpedshaders + i;
+	d->dstAlphaMode = dstAlphaMode;
+	d->components = components;
+	d->primitive_type = primitive_type;
+	return i;
+}
+
 
 // Dumpframe format. All multi-byte values are in native endian order
 // String ID's are 4 bytes output as a value where the first character
@@ -200,7 +256,9 @@ void write4c(const char *s)
 // vdcl #### vtx_decl AttributeFormat structures position*1, normals*3, colors*2, texcoords*8,posmtx*1
 // vrtx #### u32 stride then_all_the_vertex_data       (The vertex count is (####-4) / stride)
 // indx #### u16[]_index_values    (The index count is #### / 2)
-// draw #### u32_primitive         (The primitive is GL_POINTS, GL_LINES, GL_TRIANGLE_STRIP, etc.)
+// cnst #### the uniform constant blocks for pixel, vertex, geometry shaders
+// shad #### Two null terminated strings, the pixel + vertex shaders
+// draw #### u32_primitive u32_shaderid        (The primitive is GL_POINTS, GL_LINES, GL_TRIANGLE_STRIP, etc.)
 
 void VideoBackend::Video_DumpFrame()
 {

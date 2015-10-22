@@ -189,6 +189,29 @@ GLuint ProgramShaderCache::GetCurrentProgram()
 
 SHADER* ProgramShaderCache::SetShader(DSTALPHA_MODE dstAlphaMode, u32 components, u32 primitive_type)
 {
+	if(dumpframestate==1)
+	{
+		int isnew = dumpedshaderid(dstAlphaMode, components, primitive_type);
+
+		if(isnew && dumpframefile)
+		{
+			VertexShaderCode vcode;
+			PixelShaderCode pcode;
+			ShaderCode gcode;
+			GenerateVertexShaderCode(vcode, components, API_OPENGL);
+			GeneratePixelShaderCode(pcode, dstAlphaMode, API_OPENGL, components);
+			write4c("shad");
+			int plen = strlen(pcode.GetBuffer())+1;
+			int vlen = strlen(vcode.GetBuffer())+1;
+			write32(plen + vlen);
+			fwrite(pcode.GetBuffer(), plen, 1, dumpframefile);
+			fwrite(vcode.GetBuffer(), vlen, 1, dumpframefile);
+			writepad();
+		}
+
+	}
+
+
 	SHADERUID uid;
 	GetShaderId(&uid, dstAlphaMode, components, primitive_type);
 
