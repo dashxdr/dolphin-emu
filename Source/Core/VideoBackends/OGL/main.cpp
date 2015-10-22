@@ -165,6 +165,42 @@ bool VideoBackend::Initialize(void *window_handle)
 int dumpframestate = 0;
 FILE *dumpframefile = 0;
 int dumpframecount = 0;
+extern void write32(u32 v);
+extern void write4c(const char *s);
+extern void writepad(void);
+void writepad(void)
+{
+	if(!dumpframefile) return;
+	int v = ftell(dumpframefile)&3;
+	if(v)
+	{
+		while(v++<4) fputc(0, dumpframefile);
+	}
+}
+void write32(u32 v)
+{
+	if(dumpframefile)
+		fwrite(&v, sizeof(v), 1, dumpframefile);
+}
+void write4c(const char *s)
+{
+	if(strlen(s)<4) return;
+	u32 v = (s[0]<<24) | (s[1]<<16) | (s[2]<<8) | s[3];
+	write32(v);
+}
+
+// Dumpframe format. All multi-byte values are in native endian order
+// String ID's are 4 bytes output as a value where the first character
+// is shifted left 24 bits and the last character is in the LSB position.
+// FORMAT OF DUMP FILE:
+// String ID "Ddv0"
+// Any number of 4 byte String ID followed by 4 bytes of bytecount
+//    that many bytes of data, format depends on String ID
+//    padding null bytes in order that we start on an even 4-byte location 
+// vdcl #### vtx_decl AttributeFormat structures position*1, normals*3, colors*2, texcoords*8,posmtx*1
+// vrtx #### u32 stride then_all_the_vertex_data       (The vertex count is (####-4) / stride)
+// indx #### u16[]_index_values    (The index count is #### / 2)
+// draw #### u32_primitive         (The primitive is GL_POINTS, GL_LINES, GL_TRIANGLE_STRIP, etc.)
 
 void VideoBackend::Video_DumpFrame()
 {

@@ -70,60 +70,20 @@ void VertexManager::DestroyDeviceObjects()
 
 extern int dumpframestate;
 extern FILE *dumpframefile;
+extern void write32(u32 v);
+extern void write4c(const char *s);
+extern void writepad(void);
 
-static void dumptype(u8 *p8, int n, int type)
+static void DumpAttributeFormat(AttributeFormat af[], int count)
 {
-	switch(type)
-	{
-	case 0: // U8
-		p8 += n;
-		fprintf(dumpframefile, "%d", *p8);
-		break;
-	case 1: // S8
-		p8 += n;
-		fprintf(dumpframefile, "%d", *(s8 *)p8);
-		break;
-	case 2: // U16
-		p8 += n*2;
-		fprintf(dumpframefile, "%d", *(u16 *)p8);
-		break;
-	case 3: // S16
-		p8 += n*2;
-		fprintf(dumpframefile, "%d", *(s16 *)p8);
-		break;
-	case 4: // F32
-		p8 += n*4;
-		fprintf(dumpframefile, "%f", *(float *)p8);
-		break;
-	}
+	fwrite(af, sizeof(af[0]), count, dumpframefile);
 }
-static void DumpAttributeFormat(u8 *p8, AttributeFormat af[], int count, const char *id)
-{
-	const char *vartypes[5] = {"U8", "S8", "U16", "S16", "F32"};
-	int i;
-	for(i=0;i<count;++i)
-	{
-		if(!af[i].enable) continue;
-		char idc[2] = {(char)('0' + i), 0};
-		if(count==1) idc[0] = 0;
-		const char *type = "unknown";
-		if(af[i].type>=0 && af[i].type<5) type=vartypes[af[i].type];
-		fprintf(dumpframefile, "%s%s: %s[%d]={", id, idc, type, af[i].components);
-		int j;
-		for(j=0;j<af[i].components;++j)
-		{
-			if(j>0) fprintf(dumpframefile, ",");
-			dumptype(p8+af[i].offset, j, af[i].type);
-
-		}
-		fprintf(dumpframefile, "}\n");
-	}
-}
-static void DumpAttributeFormat(u8 *p8, AttributeFormat af, int count, const char *id)
+static void DumpAttributeFormat(AttributeFormat af, int count)
 {
 	AttributeFormat tf[1] = {af};
-	DumpAttributeFormat(p8, tf, count, id);
+	DumpAttributeFormat(tf, count);
 }
+
 void VertexManager::PrepareDrawBuffers(u32 stride)
 {
 	u32 vertex_data_size = IndexGenerator::GetNumVerts() * stride;
@@ -132,30 +92,30 @@ void VertexManager::PrepareDrawBuffers(u32 stride)
 	{
 		int numverts = IndexGenerator::GetNumVerts();
 //		printf("PrepareDrawBuffers: VAO(%2d) stride=%u, count=%d\n", m_last_vao, stride, numverts);
-		fprintf(dumpframefile, "VERTEXLIST: %d[%d]\n", numverts, stride);
 		GLVertexFormat *nativeVertexFmt = (GLVertexFormat*)VertexLoaderManager::GetCurrentVertexFormat();
 		PortableVertexDeclaration vtx_decl = nativeVertexFmt->GetVertexDeclaration();
-		int i;
 		u8 *p8 = s_pBaseBufferPointer;// + stride * s_baseVertex;
-		for(i=0;i<numverts;++i)
-		{
-			fprintf(dumpframefile, "Vertex%d:\n", i);
-			DumpAttributeFormat(p8, vtx_decl.position, 1, "position");
-			DumpAttributeFormat(p8, vtx_decl.normals, 3, "normals");
-			DumpAttributeFormat(p8, vtx_decl.colors, 2, "colors");
-			DumpAttributeFormat(p8, vtx_decl.texcoords, 8, "texcoords");
-			DumpAttributeFormat(p8, vtx_decl.posmtx, 1, "posmtx");
-			p8 += stride;
-		}
+		write4c("vdcl");
+		write32(sizeof(AttributeFormat)*15);
+		DumpAttributeFormat(vtx_decl.position, 1);
+		DumpAttributeFormat(vtx_decl.normals, 3);
+		DumpAttributeFormat(vtx_decl.colors, 2);
+		DumpAttributeFormat(vtx_decl.texcoords, 8);
+		DumpAttributeFormat(vtx_decl.posmtx, 1);
+		writepad();
+
+		write4c("vrtx");
+		write32(stride * numverts+4);
+		write32(stride);
+		fwrite(p8, stride, numverts, dumpframefile);
+		writepad();
+
 		int index_size = IndexGenerator::GetIndexLen();
-		fprintf(dumpframefile, "INDEXLIST: %d\n", index_size);
-		for(i=0;i<index_size;++i)
-		{
-			if(i) fprintf(dumpframefile, ",");
-			if((i&15)==15) fprintf(dumpframefile, "\n");
-			fprintf(dumpframefile, "%d", s_pIndexBufferPointer[i]);
-		}
-		fprintf(dumpframefile, "\n");
+
+		write4c("indx");
+		write32(index_size*2);
+		fwrite(s_pIndexBufferPointer, 2, index_size, dumpframefile);
+		writepad();
 	}
 	s_vertexBuffer->Unmap(vertex_data_size);
 	s_indexBuffer->Unmap(index_data_size);
@@ -212,25 +172,15 @@ void VertexManager::Draw(u32 stride)
 			break;
 	}
 
+	if(dumpframestate==1)
+	{
+		write4c("draw");
+		write32(4);
+		write32(primitive_mode);
+		writepad();
+	}
 	if (g_ogl_config.bSupportsGLBaseVertex)
 	{
-		if(dumpframestate==1)
-		{
-			const char *pname = "unknown";
-			switch(current_primitive_type)
-			{
-			case PRIMITIVE_POINTS:
-				pname = "points";
-				break;
-			case PRIMITIVE_LINES:
-				pname = "lines";
-				break;
-			case PRIMITIVE_TRIANGLES:
-				pname = (primitive_mode == GL_TRIANGLES) ? "triangles" : "triangle_strip";
-				break;
-			}
-			fprintf(dumpframefile, "DRAW: primitive=%s\n", pname);
-		}
 		glDrawRangeElementsBaseVertex(primitive_mode, 0, max_index, index_size, GL_UNSIGNED_SHORT, (u8*)nullptr+s_index_offset, (GLint)s_baseVertex);
 	}
 	else

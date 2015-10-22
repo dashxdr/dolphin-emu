@@ -1691,6 +1691,9 @@ void Renderer::SwapImpl(u32 xfbAddr, u32 fbWidth, u32 fbStride, u32 fbHeight, co
 extern int dumpframestate;
 extern FILE *dumpframefile;
 extern int dumpframecount;
+extern void write4c(const char *s);
+extern void write32(u32 v);
+extern void writepad(void);
 
 	if(dumpframestate > 0)
 	{
@@ -1698,10 +1701,11 @@ extern int dumpframecount;
 		if(dumpframestate == 1)
 		{
 			char tempname[64];
-			snprintf(tempname, sizeof(tempname), "/tmp/dumpframe%04d.txt",
+			snprintf(tempname, sizeof(tempname), "/tmp/dumpframe%04d.bin",
 				dumpframecount++);
-			dumpframefile = fopen(tempname, "w");
+			dumpframefile = fopen(tempname, "wb");
 			printf("Dumping frame to file %s\n", tempname);
+			write4c("Ddv0");
 		} else if(dumpframestate == 0)
 		{
 			fclose(dumpframefile);
