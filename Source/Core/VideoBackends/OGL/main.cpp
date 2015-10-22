@@ -81,6 +81,8 @@ Make AA apply instantly during gameplay if possible
 #include "VideoCommon/VideoConfig.h"
 #include "VideoCommon/VideoState.h"
 
+#include "DumpFrame.h"
+
 namespace OGL
 {
 
@@ -163,11 +165,9 @@ bool VideoBackend::Initialize(void *window_handle)
 }
 
 int dumpframestate = 0;
+int dumpframeconstants = 0;
 FILE *dumpframefile = 0;
 int dumpframecount = 0;
-extern void write32(u32 v);
-extern void write4c(const char *s);
-extern void writepad(void);
 void writepad(void)
 {
 	if(!dumpframefile) return;

@@ -29,6 +29,8 @@
 #include "VideoCommon/VertexShaderManager.h"
 #include "VideoCommon/VideoConfig.h"
 
+#include "DumpFrame.h"
+
 namespace OGL
 {
 //This are the initially requested size for the buffers expressed in bytes
@@ -67,12 +69,6 @@ void VertexManager::DestroyDeviceObjects()
 	delete s_vertexBuffer;
 	delete s_indexBuffer;
 }
-
-extern int dumpframestate;
-extern FILE *dumpframefile;
-extern void write32(u32 v);
-extern void write4c(const char *s);
-extern void writepad(void);
 
 static void DumpAttributeFormat(AttributeFormat af[], int count)
 {

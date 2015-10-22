@@ -52,6 +52,8 @@
 #include "VideoCommon/VertexShaderManager.h"
 #include "VideoCommon/VideoConfig.h"
 
+#include "DumpFrame.h"
+
 #if defined _WIN32 || defined HAVE_LIBAV
 #include "VideoCommon/AVIDump.h"
 #endif
@@ -1688,18 +1690,13 @@ void Renderer::SwapImpl(u32 xfbAddr, u32 fbWidth, u32 fbStride, u32 fbHeight, co
 	}
 	// Copy the rendered frame to the real window
 	GLInterface->Swap();
-extern int dumpframestate;
-extern FILE *dumpframefile;
-extern int dumpframecount;
-extern void write4c(const char *s);
-extern void write32(u32 v);
-extern void writepad(void);
 
 	if(dumpframestate > 0)
 	{
 		--dumpframestate;
 		if(dumpframestate == 1)
 		{
+			dumpframeconstants=1;
 			char tempname[64];
 			snprintf(tempname, sizeof(tempname), "/tmp/dumpframe%04d.bin",
 				dumpframecount++);

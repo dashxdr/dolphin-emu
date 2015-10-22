@@ -19,6 +19,8 @@
 #include "VideoCommon/Statistics.h"
 #include "VideoCommon/VertexShaderManager.h"
 
+#include "DumpFrame.h"
+
 namespace OGL
 {
 
@@ -139,6 +141,7 @@ void ProgramShaderCache::UploadConstants()
 {
 	if (PixelShaderManager::dirty || VertexShaderManager::dirty || GeometryShaderManager::dirty)
 	{
+		if(dumpframestate==1) dumpframeconstants = 1;
 		auto buffer = s_buffer->Map(s_ubo_buffer_size, s_ubo_align);
 
 		memcpy(buffer.first,
@@ -163,6 +166,19 @@ void ProgramShaderCache::UploadConstants()
 		GeometryShaderManager::dirty = false;
 
 		ADDSTAT(stats.thisFrame.bytesUniformStreamed, s_ubo_buffer_size);
+	}
+	if(dumpframeconstants)
+	{
+		dumpframeconstants = 0;
+		if(dumpframefile)
+		{
+			write4c("cnst");
+			write32(sizeof(PixelShaderConstants) + sizeof(VertexShaderConstants) + sizeof(GeometryShaderConstants));
+			fwrite(&PixelShaderManager::constants, sizeof(PixelShaderConstants), 1, dumpframefile);
+			fwrite(&VertexShaderManager::constants, sizeof(VertexShaderConstants), 1, dumpframefile);
+			fwrite(&GeometryShaderManager::constants, sizeof(GeometryShaderConstants), 1, dumpframefile);
+			writepad();
+		}
 	}
 }
 
