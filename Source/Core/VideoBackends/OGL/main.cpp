@@ -241,7 +241,7 @@ int dumpedshaderid(DSTALPHA_MODE dstAlphaMode, u32 components, u32 primitive_typ
 	d->dstAlphaMode = dstAlphaMode;
 	d->components = components;
 	d->primitive_type = primitive_type;
-	return i;
+	return 1;
 }
 
 
