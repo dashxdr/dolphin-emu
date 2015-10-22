@@ -201,10 +201,13 @@ SHADER* ProgramShaderCache::SetShader(DSTALPHA_MODE dstAlphaMode, u32 components
 			GenerateVertexShaderCode(vcode, components, API_OPENGL);
 			GeneratePixelShaderCode(pcode, dstAlphaMode, API_OPENGL, components);
 			write4c("shad");
+			int headlen = strlen(s_glsl_header);
 			int plen = strlen(pcode.GetBuffer())+1;
 			int vlen = strlen(vcode.GetBuffer())+1;
-			write32(plen + vlen);
+			write32(plen + vlen + headlen*2);
+			fwrite(s_glsl_header, headlen, 1, dumpframefile);
 			fwrite(pcode.GetBuffer(), plen, 1, dumpframefile);
+			fwrite(s_glsl_header, headlen, 1, dumpframefile);
 			fwrite(vcode.GetBuffer(), vlen, 1, dumpframefile);
 			writepad();
 		}
