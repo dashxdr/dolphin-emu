@@ -1009,7 +1009,7 @@ static void ssl_mac( md_context_t *md_ctx, unsigned char *secret,
     header[ 9] = (unsigned char)( len >> 8 );
     header[10] = (unsigned char)( len      );
 
-    memset( padding, 0x36, padlen );
+    if(padlen) memset( padding, 0x36, padlen );
     md_starts( md_ctx );
     md_update( md_ctx, secret,  md_size );
     md_update( md_ctx, padding, padlen  );
@@ -1017,7 +1017,7 @@ static void ssl_mac( md_context_t *md_ctx, unsigned char *secret,
     md_update( md_ctx, buf,     len     );
     md_finish( md_ctx, buf +    len     );
 
-    memset( padding, 0x5C, padlen );
+    if(padlen) memset( padding, 0x5C, padlen );
     md_starts( md_ctx );
     md_update( md_ctx, secret,    md_size );
     md_update( md_ctx, padding,   padlen  );
