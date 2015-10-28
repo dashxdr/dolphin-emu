@@ -1194,6 +1194,7 @@ void Renderer::SetViewport()
 	int scissorXOff = bpmem.scissorOffset.x * 2;
 	int scissorYOff = bpmem.scissorOffset.y * 2;
 
+//printf("SetViewport: %f %f %f %f\n", xfmem.viewport.xOrig, xfmem.viewport.yOrig, xfmem.viewport.wd, xfmem.viewport.ht);
 	// TODO: ceil, floor or just cast to int?
 	float X = EFBToScaledXf(xfmem.viewport.xOrig - xfmem.viewport.wd - (float)scissorXOff);
 	float Y = EFBToScaledYf((float)EFB_HEIGHT - xfmem.viewport.yOrig + xfmem.viewport.ht + (float)scissorYOff);
@@ -1210,6 +1211,29 @@ void Renderer::SetViewport()
 	{
 		Y += Height;
 		Height *= -1;
+	}
+	if(dumpframestate==1 && dumpframefile)
+	{
+		struct vp {
+			float xorig, yorig;
+			float width, height;
+			int scissorxoff, scissoryoff;
+			float near, far;
+			GLint depthfunc;
+		} tvp;
+		tvp.xorig = xfmem.viewport.xOrig;
+		tvp.yorig = xfmem.viewport.yOrig;
+		tvp.width = xfmem.viewport.wd;
+		tvp.height = xfmem.viewport.ht;
+		tvp.scissorxoff = scissorXOff;
+		tvp.scissoryoff = scissorYOff;
+		tvp.near = GLNear;
+		tvp.far = GLFar;
+		glGetIntegerv(GL_DEPTH_FUNC, &tvp.depthfunc);
+		write4c("vprt");
+		write32(sizeof(tvp));
+		fwrite(&tvp, sizeof(tvp), 1, dumpframefile);
+		writepad();
 	}
 
 	// Update the view port
