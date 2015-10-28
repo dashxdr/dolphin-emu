@@ -1902,6 +1902,25 @@ void Renderer::SetSamplerState(int stage, int texindex, bool custom_tex)
 	auto const& tm1 = tex.texMode1[stage];
 
 	g_sampler_cache->SetSamplerState((texindex * 4) + stage, tm0, tm1, custom_tex);
+
+	if(dumpframestate==1)
+	{
+		stage &= 7; // just to be safe...
+		glActiveTexture(GL_TEXTURE0 + stage);
+		GLint sampler=0;
+		glGetIntegerv(GL_SAMPLER_BINDING, &sampler);
+		struct samplerpars *sp = new_spg.pars+stage;
+		glGetSamplerParameteriv(sampler, GL_TEXTURE_MIN_FILTER, &sp->min_filter);
+		glGetSamplerParameteriv(sampler, GL_TEXTURE_MAG_FILTER, &sp->mag_filter);
+		glGetSamplerParameteriv(sampler, GL_TEXTURE_WRAP_S, &sp->wrap_s);
+		glGetSamplerParameteriv(sampler, GL_TEXTURE_WRAP_T, &sp->wrap_t);
+		glGetSamplerParameteriv(sampler, GL_TEXTURE_MIN_LOD, &sp->min_lod);
+		glGetSamplerParameteriv(sampler, GL_TEXTURE_MAX_LOD, &sp->max_lod);
+		glGetSamplerParameterfv(sampler, GL_TEXTURE_LOD_BIAS, &sp->lod_bias);
+		glGetSamplerParameterfv(sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, &sp->max_anisotropy);
+
+		TextureCache::SetStage(); // restore active texture
+	}
 }
 
 void Renderer::SetInterlacingMode()

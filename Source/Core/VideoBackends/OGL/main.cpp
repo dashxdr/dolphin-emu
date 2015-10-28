@@ -171,6 +171,7 @@ int dumpframecount = 0;
 int dumpedshadercount = 0;
 int currentshaderid = 0;
 struct vpt new_vpt, old_vpt;
+struct spgroup new_spg, old_spg;
 #define TCOUNT 8
 static std::string df_textures[TCOUNT] = "";
 static std::string texturepath = "";
@@ -243,6 +244,8 @@ void dumpframestart(void)
 			df_textures_dirty = 0;
 			memset(&old_vpt, 0, sizeof(old_vpt));
 			memset(&new_vpt, 0, sizeof(new_vpt));
+			memset(&old_spg, 0, sizeof(old_spg));
+			memset(&new_spg, 0, sizeof(new_spg));
 			dumpframeconstants=1;
 			dumpedshadercount=0;
 			char tempname[64];

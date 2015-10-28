@@ -116,6 +116,15 @@ void VertexManager::PrepareDrawBuffers(u32 stride)
 			writepad();
 			memcpy(&old_vpt, &new_vpt, sizeof(old_vpt));
 		}
+		if(memcmp(&old_spg, &new_spg, sizeof(old_spg)))
+		{
+			write4c("spgr");
+			write32(sizeof(new_spg));
+			fwrite(&new_spg, sizeof(new_spg), 1, dumpframefile);
+			writepad();
+			memcpy(&old_spg, &new_spg, sizeof(old_spg));
+		}
+
 		dumpframe_textures();
 	}
 	s_vertexBuffer->Unmap(vertex_data_size);

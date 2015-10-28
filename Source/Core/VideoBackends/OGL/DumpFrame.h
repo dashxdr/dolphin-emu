@@ -37,4 +37,16 @@ extern struct vpt {
 	int ColorMask, AlphaMask;
 } new_vpt, old_vpt;
 
+struct samplerpars {
+	GLint min_filter, mag_filter;
+	GLint wrap_s, wrap_t;
+	GLint min_lod, max_lod;
+	GLfloat lod_bias, max_anisotropy;
+};
+
+extern struct spgroup {
+	struct samplerpars pars[8];
+} new_spg, old_spg;
+
+
 }
