@@ -170,6 +170,7 @@ FILE *dumpframefile = 0;
 int dumpframecount = 0;
 int dumpedshadercount = 0;
 int currentshaderid = 0;
+struct vpt new_vpt, old_vpt;
 void writepad(void)
 {
 	if(!dumpframefile) return;
@@ -197,6 +198,8 @@ void dumpframestart(void)
 		--dumpframestate;
 		if(dumpframestate == 1)
 		{
+			memset(&old_vpt, 0, sizeof(old_vpt));
+			memset(&new_vpt, 0, sizeof(new_vpt));
 			dumpframeconstants=1;
 			dumpedshadercount=0;
 			char tempname[64];

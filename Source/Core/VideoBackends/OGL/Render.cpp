@@ -1214,26 +1214,14 @@ void Renderer::SetViewport()
 	}
 	if(dumpframestate==1 && dumpframefile)
 	{
-		struct vp {
-			float xorig, yorig;
-			float width, height;
-			int scissorxoff, scissoryoff;
-			float near, far;
-			GLint depthfunc;
-		} tvp;
-		tvp.xorig = xfmem.viewport.xOrig;
-		tvp.yorig = xfmem.viewport.yOrig;
-		tvp.width = xfmem.viewport.wd;
-		tvp.height = xfmem.viewport.ht;
-		tvp.scissorxoff = scissorXOff;
-		tvp.scissoryoff = scissorYOff;
-		tvp.near = GLNear;
-		tvp.far = GLFar;
-		glGetIntegerv(GL_DEPTH_FUNC, &tvp.depthfunc);
-		write4c("vprt");
-		write32(sizeof(tvp));
-		fwrite(&tvp, sizeof(tvp), 1, dumpframefile);
-		writepad();
+		new_vpt.xorig = xfmem.viewport.xOrig;
+		new_vpt.yorig = xfmem.viewport.yOrig;
+		new_vpt.width = xfmem.viewport.wd;
+		new_vpt.height = xfmem.viewport.ht;
+		new_vpt.scissorxoff = scissorXOff;
+		new_vpt.scissoryoff = scissorYOff;
+		new_vpt.near = GLNear;
+		new_vpt.far = GLFar;
 	}
 
 	// Update the view port

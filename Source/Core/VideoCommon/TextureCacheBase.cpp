@@ -227,7 +227,10 @@ void TextureCache::DumpTexture(TCacheEntryBase* entry, std::string basename, uns
 	std::string filename = szDir + "/" + basename + ".png";
 
 	if (!File::Exists(filename))
+	{
+//printf("Dumping texture! %s\n", filename.c_str());
 		entry->Save(filename, level);
+	}
 }
 
 static u32 CalculateLevelSize(u32 level_0_size, u32 level)

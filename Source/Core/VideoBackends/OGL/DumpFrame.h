@@ -11,4 +11,13 @@ extern int dumpedshadercount;
 extern int currentshaderid;
 extern void dumpframestart(void);
 extern int dumpedshaderid(DSTALPHA_MODE dstAlphaMode, u32 components, u32 primitive_type);
+
+extern struct vpt {
+	float xorig, yorig;
+	float width, height;
+	int scissorxoff, scissoryoff;
+	float near, far;
+	GLint depthfunc;
+} new_vpt, old_vpt;
+
 }
