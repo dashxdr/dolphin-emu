@@ -68,7 +68,7 @@ void GLVertexFormat::Initialize(const PortableVertexDeclaration &_vtx_decl)
 
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
-printf("NativeVertexFormat.cpp Initialize!!!!  VAO=%d\n", VAO);
+//static int vaocount=0;printf("NativeVertexFormat.cpp Initialize!!!!  VAO%d=%d\n", vaocount++, VAO);
 
 	// the element buffer is bound directly to the vao, so we must it set for every vao
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vm->m_index_buffers);

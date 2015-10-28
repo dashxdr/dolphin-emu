@@ -74,11 +74,6 @@ static void DumpAttributeFormat(AttributeFormat af[], int count)
 {
 	fwrite(af, sizeof(af[0]), count, dumpframefile);
 }
-static void DumpAttributeFormat(AttributeFormat af, int count)
-{
-	AttributeFormat tf[1] = {af};
-	DumpAttributeFormat(tf, count);
-}
 
 void VertexManager::PrepareDrawBuffers(u32 stride)
 {
@@ -93,11 +88,11 @@ void VertexManager::PrepareDrawBuffers(u32 stride)
 		u8 *p8 = s_pBaseBufferPointer;// + stride * s_baseVertex;
 		write4c("vdcl");
 		write32(sizeof(AttributeFormat)*15);
-		DumpAttributeFormat(vtx_decl.position, 1);
+		DumpAttributeFormat(&vtx_decl.position, 1);
 		DumpAttributeFormat(vtx_decl.normals, 3);
 		DumpAttributeFormat(vtx_decl.colors, 2);
 		DumpAttributeFormat(vtx_decl.texcoords, 8);
-		DumpAttributeFormat(vtx_decl.posmtx, 1);
+		DumpAttributeFormat(&vtx_decl.posmtx, 1);
 		writepad();
 
 		write4c("vrtx");

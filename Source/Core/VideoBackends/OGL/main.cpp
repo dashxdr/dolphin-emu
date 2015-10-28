@@ -173,6 +173,7 @@ int currentshaderid = 0;
 struct vpt new_vpt, old_vpt;
 #define TCOUNT 8
 static std::string df_textures[TCOUNT] = "";
+static std::string texturepath = "";
 int df_textures_dirty = 0;
 void writepad(void)
 {
@@ -201,6 +202,11 @@ void dumpframe_bindtexture(int ndx, std::string basename)
 		df_textures[ndx] = basename;
 		df_textures_dirty = 1;
 	}
+}
+
+void dumpframe_texturepath(std::string pathname)
+{
+	texturepath = pathname;
 }
 
 void dumpframe_textures(void)
@@ -245,6 +251,14 @@ void dumpframestart(void)
 			dumpframefile = fopen(tempname, "wb");
 			printf("Dumping frame to file %s\n", tempname);
 			write4c("Ddv0");
+			int len = texturepath.size();
+			if(len>0)
+			{
+				write4c("tpth");
+				write32(len+1);
+				fwrite(texturepath.c_str(), len+1, 1, dumpframefile);
+				writepad();
+			}
 		} else if(dumpframestate == 0)
 		{
 			fclose(dumpframefile);

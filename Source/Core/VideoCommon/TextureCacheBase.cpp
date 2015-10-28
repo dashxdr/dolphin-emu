@@ -20,6 +20,12 @@
 #include "VideoCommon/TextureCacheBase.h"
 #include "VideoCommon/VideoConfig.h"
 
+namespace OGL
+{
+	extern void dumpframe_texturepath(std::string pathname);
+	extern void dumpframe_bindtexture(int ndx, std::string basename);
+}
+
 static const u64 TEXHASH_INVALID = 0;
 static const int TEXTURE_KILL_THRESHOLD = 60;
 static const int TEXTURE_POOL_KILL_THRESHOLD = 3;
@@ -216,6 +222,8 @@ void TextureCache::DumpTexture(TCacheEntryBase* entry, std::string basename, uns
 	std::string szDir = File::GetUserPath(D_DUMPTEXTURES_IDX) +
 		SConfig::GetInstance().m_LocalCoreStartupParameter.m_strUniqueID;
 
+	OGL::dumpframe_texturepath(szDir);
+
 	// make sure that the directory exists
 	if (!File::Exists(szDir) || !File::IsDirectory(szDir))
 		File::CreateDir(szDir);
@@ -247,11 +255,6 @@ TextureCache::TCacheEntryBase* TextureCache::ReturnEntry(unsigned int stage, TCa
 	GFX_DEBUGGER_PAUSE_AT(NEXT_TEXTURE_CHANGE, true);
 
 	return entry;
-}
-
-namespace OGL
-{
-	extern void dumpframe_bindtexture(int ndx, std::string basename);
 }
 
 void TextureCache::BindTextures()

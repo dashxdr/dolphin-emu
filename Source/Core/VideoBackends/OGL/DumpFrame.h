@@ -13,6 +13,7 @@ extern void dumpframestart(void);
 extern int dumpedshaderid(DSTALPHA_MODE dstAlphaMode, u32 components, u32 primitive_type);
 extern void dumpframe_bindtexture(int ndx, std::string basename);
 extern void dumpframe_textures(void);
+extern void dumpframe_texturepath(std::string pathname);
 
 extern struct vpt {
 	float xorig, yorig;
