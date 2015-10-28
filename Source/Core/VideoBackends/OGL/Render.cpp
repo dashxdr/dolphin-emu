@@ -208,6 +208,7 @@ static void GLAPIENTRY DepthRangef(GLfloat neardepth, GLfloat fardepth)
 }
 static void GLAPIENTRY ClearDepthf(GLfloat depthval)
 {
+	new_vpt.cleardepth = depthval;
 	glClearDepth(depthval);
 }
 
@@ -910,6 +911,8 @@ void Renderer::SetColorMask()
 		if (bpmem.blendmode.alphaupdate && (bpmem.zcontrol.pixel_format == PEControl::RGBA6_Z24))
 			AlphaMask = GL_TRUE;
 	}
+	new_vpt.ColorMask = ColorMask;
+	new_vpt.AlphaMask = AlphaMask;
 	glColorMask(ColorMask,  ColorMask,  ColorMask,  AlphaMask);
 }
 
@@ -1243,6 +1246,10 @@ void Renderer::SetViewport()
 void Renderer::ClearScreen(const EFBRectangle& rc, bool colorEnable, bool alphaEnable, bool zEnable, u32 color, u32 z)
 {
 	ResetAPIState();
+	new_vpt.colorEnable = colorEnable ? 1 : 0;
+	new_vpt.alphaEnable = alphaEnable ? 1 : 0;
+	new_vpt.zEnable = zEnable ? 1 : 0;
+	new_vpt.clearcolor = color;
 
 	// color
 	GLboolean const
@@ -1259,7 +1266,9 @@ void Renderer::ClearScreen(const EFBRectangle& rc, bool colorEnable, bool alphaE
 	// depth
 	glDepthMask(zEnable ? GL_TRUE : GL_FALSE);
 
-	glClearDepthf(float(z & 0xFFFFFF) / 16777216.0f);
+	float cleardepth = float(z & 0xFFFFFF) / 16777216.0f;
+	new_vpt.cleardepth = cleardepth;
+	glClearDepthf(cleardepth);
 
 	// Update rect for clearing the picture
 	glEnable(GL_SCISSOR_TEST);
@@ -1362,6 +1371,8 @@ void Renderer::SetBlendMode(bool forceUpdate)
 	{
 		// blend enable change
 		(newval & 1) ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
+		new_vpt.blendenable = (newval&1);
+//printf("0:glEnable(%d)\n", newval&1);
 	}
 
 	if (changes & 4)
@@ -1369,8 +1380,12 @@ void Renderer::SetBlendMode(bool forceUpdate)
 		// subtract enable change
 		GLenum equation = newval & 4 ? GL_FUNC_REVERSE_SUBTRACT : GL_FUNC_ADD;
 		GLenum equationAlpha = useDualSource ? GL_FUNC_ADD : equation;
+//const char *eqname = (newval & 4) ? "GL_FUNC_REVERSE_SUBTRACT" : "GL_FUNC_ADD";
+//printf("1:glBlendEquationSeparate(%s,%s)\n", eqname, useDualSource ? "GL_FUNC_ADD" : eqname);
 
 		glBlendEquationSeparate(equation, equationAlpha);
+		new_vpt.blendequation = equation;
+		new_vpt.blendequationAlpha = equationAlpha;
 	}
 
 	if (changes & 0x1FA)
@@ -1404,6 +1419,11 @@ void Renderer::SetBlendMode(bool forceUpdate)
 		GLenum dstFactorAlpha = glDestFactors[dstidx];
 		// blend RGB change
 		glBlendFuncSeparate(srcFactor, dstFactor, srcFactorAlpha, dstFactorAlpha);
+//printf("2:GlBlendFuncSeparate(%d,%d,%d,%d)\n", srcFactor, dstFactor, srcFactorAlpha, dstFactorAlpha);
+		new_vpt.srcFactor = srcFactor;
+		new_vpt.dstFactor = dstFactor;
+		new_vpt.srcFactorAlpha = srcFactorAlpha;
+		new_vpt.dstFactorAlpha = dstFactorAlpha;
 	}
 	s_blendMode = newval;
 }
@@ -1783,9 +1803,11 @@ void Renderer::SetGenerationMode()
 		// TODO: GX_CULL_ALL not supported, yet!
 		glEnable(GL_CULL_FACE);
 		glFrontFace(bpmem.genMode.cullmode == 2 ? GL_CCW : GL_CW);
+		new_vpt.cullmode = bpmem.genMode.cullmode == 2 ? GL_CCW : GL_CW;
 	}
 	else
 	{
+		new_vpt.cullmode = -1;
 		glDisable(GL_CULL_FACE);
 	}
 }
@@ -1808,7 +1830,11 @@ void Renderer::SetDepthMode()
 	{
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(bpmem.zmode.updateenable ? GL_TRUE : GL_FALSE);
-		glDepthFunc(glCmpFuncs[bpmem.zmode.func]);
+		GLenum func = glCmpFuncs[bpmem.zmode.func];
+		glDepthFunc(func);
+		new_vpt.depthEnable = 1;
+		new_vpt.depthMask = bpmem.zmode.updateenable ? 1 : 0;
+		new_vpt.depthfunc = func;
 	}
 	else
 	{
@@ -1816,6 +1842,9 @@ void Renderer::SetDepthMode()
 		// TODO: When PE performance metrics are being emulated via occlusion queries, we should (probably?) enable depth test with depth function ALWAYS here
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
+		new_vpt.depthEnable = 0;
+		new_vpt.depthMask = 0;
+		new_vpt.depthfunc = GL_ALWAYS;
 	}
 }
 
@@ -1847,10 +1876,13 @@ void Renderer::SetLogicOpMode()
 	if (bpmem.blendmode.logicopenable && !bpmem.blendmode.blendenable)
 	{
 		glEnable(GL_COLOR_LOGIC_OP);
-		glLogicOp(glLogicOpCodes[bpmem.blendmode.logicmode]);
+		GLenum logicop = glLogicOpCodes[bpmem.blendmode.logicmode];
+		new_vpt.logicop = logicop;
+		glLogicOp(logicop);
 	}
 	else
 	{
+		new_vpt.logicop = -1;
 		glDisable(GL_COLOR_LOGIC_OP);
 	}
 }

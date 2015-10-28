@@ -171,6 +171,9 @@ int dumpframecount = 0;
 int dumpedshadercount = 0;
 int currentshaderid = 0;
 struct vpt new_vpt, old_vpt;
+#define TCOUNT 8
+static std::string df_textures[TCOUNT] = "";
+int df_textures_dirty = 0;
 void writepad(void)
 {
 	if(!dumpframefile) return;
@@ -191,6 +194,37 @@ void write4c(const char *s)
 	u32 v = (s[0]<<24) | (s[1]<<16) | (s[2]<<8) | s[3];
 	write32(v);
 }
+void dumpframe_bindtexture(int ndx, std::string basename)
+{
+	if(ndx>=0 && ndx<TCOUNT && basename != df_textures[ndx])
+	{
+		df_textures[ndx] = basename;
+		df_textures_dirty = 1;
+	}
+}
+
+void dumpframe_textures(void)
+{
+	if(!df_textures_dirty)
+		return;
+	df_textures_dirty = 0;
+	if(!dumpframefile)
+		return;
+	int total = 0;
+	int i;
+	for(i=0;i<TCOUNT;++i)
+		total += df_textures[i].size() + 1;
+	write4c("text");
+	write32(total);
+	for(i=0;i<TCOUNT;++i)
+	{
+		fwrite(df_textures[i].c_str(), df_textures[i].size(), 1, dumpframefile);
+		fputc(0, dumpframefile);
+	}
+	writepad();
+}
+
+
 void dumpframestart(void)
 {
 	if(dumpframestate > 0)
@@ -198,6 +232,9 @@ void dumpframestart(void)
 		--dumpframestate;
 		if(dumpframestate == 1)
 		{
+			for(int i=0;i<TCOUNT;++i)
+				df_textures[i] = "";
+			df_textures_dirty = 0;
 			memset(&old_vpt, 0, sizeof(old_vpt));
 			memset(&new_vpt, 0, sizeof(new_vpt));
 			dumpframeconstants=1;

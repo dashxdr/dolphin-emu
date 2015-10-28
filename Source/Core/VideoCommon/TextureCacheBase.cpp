@@ -249,12 +249,20 @@ TextureCache::TCacheEntryBase* TextureCache::ReturnEntry(unsigned int stage, TCa
 	return entry;
 }
 
+namespace OGL
+{
+	extern void dumpframe_bindtexture(int ndx, std::string basename);
+}
+
 void TextureCache::BindTextures()
 {
 	for (int i = 0; i < 8; ++i)
 	{
 		if (bound_textures[i])
+		{
 			bound_textures[i]->Bind(i);
+			OGL::dumpframe_bindtexture(i, bound_textures[i]->basename);
+		}
 	}
 }
 
@@ -537,7 +545,7 @@ TextureCache::TCacheEntryBase* TextureCache::Load(const u32 stage)
 	std::string basename = "";
 	if (g_ActiveConfig.bDumpTextures && !hires_tex)
 	{
-		basename = HiresTexture::GenBaseName(
+		entry->basename = basename = HiresTexture::GenBaseName(
 			src_data, texture_size,
 			&texMem[tlutaddr], palette_size,
 			width, height,

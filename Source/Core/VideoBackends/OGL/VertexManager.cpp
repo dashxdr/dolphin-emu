@@ -113,8 +113,6 @@ void VertexManager::PrepareDrawBuffers(u32 stride)
 		fwrite(s_pIndexBufferPointer, 2, index_size, dumpframefile);
 		writepad();
 
-		glGetIntegerv(GL_DEPTH_FUNC, &new_vpt.depthfunc);
-
 		if(memcmp(&old_vpt, &new_vpt, sizeof(old_vpt)))
 		{
 			write4c("vprt");
@@ -123,6 +121,7 @@ void VertexManager::PrepareDrawBuffers(u32 stride)
 			writepad();
 			memcpy(&old_vpt, &new_vpt, sizeof(old_vpt));
 		}
+		dumpframe_textures();
 	}
 	s_vertexBuffer->Unmap(vertex_data_size);
 	s_indexBuffer->Unmap(index_data_size);
