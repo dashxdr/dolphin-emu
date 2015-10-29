@@ -181,7 +181,12 @@ void VertexManager::Draw(u32 stride)
 			primitive_mode = g_ActiveConfig.backend_info.bSupportsPrimitiveRestart ? GL_TRIANGLE_STRIP : GL_TRIANGLES;
 			break;
 	}
-
+//if(max_index==272) // face on the Mii
+//{
+//static int toggle = 0;
+//	++toggle;
+//	if(toggle&1) {printf("%d\n", toggle);return;}
+//}
 	if(dumpframestate==1)
 	{
 		write4c("draw");

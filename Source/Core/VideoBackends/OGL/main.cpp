@@ -275,17 +275,19 @@ struct dumpedshaderinfo {
 	DSTALPHA_MODE dstAlphaMode;
 	u32 components;
 	u32 primitive_type;
+	SHADERUID uid;
 } dumpedshaders[MAXDUMPEDSHADERS];
 
 // returns 0 or 1 depending on whether it's a new entry.
-int dumpedshaderid(DSTALPHA_MODE dstAlphaMode, u32 components, u32 primitive_type)
+int dumpedshaderid(DSTALPHA_MODE dstAlphaMode, u32 components, u32 primitive_type, SHADERUID uid)
 {
 	int i;
 	struct dumpedshaderinfo *d;
 	for(i=0;i<dumpedshadercount;++i)
 	{
 		d = dumpedshaders+i;
-		if(d->dstAlphaMode == dstAlphaMode && d->components == components && d->primitive_type==primitive_type)
+		if(d->dstAlphaMode == dstAlphaMode && d->components == components && d->primitive_type==primitive_type &&
+				d->uid == uid)
 		{
 			currentshaderid = i;
 			return 0;
@@ -298,6 +300,8 @@ int dumpedshaderid(DSTALPHA_MODE dstAlphaMode, u32 components, u32 primitive_typ
 	d->dstAlphaMode = dstAlphaMode;
 	d->components = components;
 	d->primitive_type = primitive_type;
+	d->uid = uid;
+//printf("New shader %d: dstAlphaMode=%x components=%x primitive=%d\n", i, dstAlphaMode, components, primitive_type);
 	return 1;
 }
 

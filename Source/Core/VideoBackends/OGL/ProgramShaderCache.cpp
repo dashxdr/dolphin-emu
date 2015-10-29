@@ -189,9 +189,12 @@ GLuint ProgramShaderCache::GetCurrentProgram()
 
 SHADER* ProgramShaderCache::SetShader(DSTALPHA_MODE dstAlphaMode, u32 components, u32 primitive_type)
 {
+	SHADERUID uid;
+	GetShaderId(&uid, dstAlphaMode, components, primitive_type);
+
 	if(dumpframestate==1)
 	{
-		int isnew = dumpedshaderid(dstAlphaMode, components, primitive_type);
+		int isnew = dumpedshaderid(dstAlphaMode, components, primitive_type, uid);
 
 		if(isnew && dumpframefile)
 		{
@@ -213,10 +216,6 @@ SHADER* ProgramShaderCache::SetShader(DSTALPHA_MODE dstAlphaMode, u32 components
 		}
 
 	}
-
-
-	SHADERUID uid;
-	GetShaderId(&uid, dstAlphaMode, components, primitive_type);
 
 	// Check if the shader is already set
 	if (last_entry)
