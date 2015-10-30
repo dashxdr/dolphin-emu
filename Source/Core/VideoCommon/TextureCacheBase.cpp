@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <string>
+#include <sys/time.h>
 
 #include "Common/FileUtil.h"
 #include "Common/MemoryUtil.h"
@@ -24,6 +25,7 @@ namespace OGL
 {
 	extern void dumpframe_texturepath(std::string pathname);
 	extern void dumpframe_bindtexture(int ndx, std::string basename);
+	extern int dumpframestate;
 }
 
 static const u64 TEXHASH_INVALID = 0;
@@ -261,10 +263,13 @@ void TextureCache::BindTextures()
 {
 	for (int i = 0; i < 8; ++i)
 	{
-		if (bound_textures[i])
+		TCacheEntryBase* entry;
+		if ((entry = bound_textures[i]))
 		{
-			bound_textures[i]->Bind(i);
-			OGL::dumpframe_bindtexture(i, bound_textures[i]->basename);
+			entry->Bind(i);
+			OGL::dumpframe_bindtexture(i, entry->basename);
+			if(OGL::dumpframestate==1)
+				DumpTexture(entry, entry->basename, 0);
 		}
 	}
 }
@@ -921,6 +926,13 @@ void TextureCache::CopyRenderTargetToTexture(u32 dstAddr, unsigned int dstFormat
 	entry->is_custom_tex = false;
 
 	entry->FromRenderTarget(dstAddr, dstFormat, srcFormat, srcRect, isIntensity, scaleByHalf, cbufid, colmat);
+
+	{
+		timeval tm;
+		gettimeofday(&tm, 0);
+		entry->basename = StringFromFormat("efb_texture_%08x_%08lx", dstAddr,
+				0xffffffff & (1000000*tm.tv_sec +tm.tv_usec));
+	}
 
 	if (g_ActiveConfig.bDumpEFBTarget)
 	{
