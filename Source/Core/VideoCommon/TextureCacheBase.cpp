@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <string>
-#include <sys/time.h>
 
 #include "Common/FileUtil.h"
 #include "Common/MemoryUtil.h"
@@ -24,7 +23,7 @@
 namespace OGL
 {
 	extern void dumpframe_texturepath(std::string pathname);
-	extern void dumpframe_bindtexture(int ndx, std::string basename);
+	extern void dumpframe_bindtexture(int ndx, TextureCache::TCacheEntryBase* entry);
 	extern int dumpframestate;
 }
 
@@ -267,9 +266,8 @@ void TextureCache::BindTextures()
 		if ((entry = bound_textures[i]))
 		{
 			entry->Bind(i);
-			OGL::dumpframe_bindtexture(i, entry->basename);
 			if(OGL::dumpframestate==1)
-				DumpTexture(entry, entry->basename, 0);
+				OGL::dumpframe_bindtexture(i, entry);
 		}
 	}
 }
@@ -928,10 +926,8 @@ void TextureCache::CopyRenderTargetToTexture(u32 dstAddr, unsigned int dstFormat
 	entry->FromRenderTarget(dstAddr, dstFormat, srcFormat, srcRect, isIntensity, scaleByHalf, cbufid, colmat);
 
 	{
-		timeval tm;
-		gettimeofday(&tm, 0);
-		entry->basename = StringFromFormat("efb_texture_%08x_%08lx", dstAddr,
-				0xffffffff & (1000000*tm.tv_sec +tm.tv_usec));
+		static int count = 0;
+		entry->basename = StringFromFormat("efb_texture_%08x_%08x", dstAddr, count++);
 	}
 
 	if (g_ActiveConfig.bDumpEFBTarget)

@@ -173,7 +173,10 @@ int currentshaderid = 0;
 struct vpt new_vpt, old_vpt;
 struct spgroup new_spg, old_spg;
 #define TCOUNT 8
-static std::string df_textures[TCOUNT] = "";
+static int df_textures[TCOUNT];
+#define MAXTEXTURES 1024
+static std::string texturenames[MAXTEXTURES];
+static int numtextures = 0;
 static std::string texturepath = "";
 int df_textures_dirty = 0;
 void writepad(void)
@@ -196,11 +199,24 @@ void write4c(const char *s)
 	u32 v = (s[0]<<24) | (s[1]<<16) | (s[2]<<8) | s[3];
 	write32(v);
 }
-void dumpframe_bindtexture(int ndx, std::string basename)
+void dumpframe_bindtexture(int ndx, TextureCache::TCacheEntryBase *entry)
 {
-	if(ndx>=0 && ndx<TCOUNT && basename != df_textures[ndx])
+	int i;
+	for(i=0;i<numtextures;++i)
 	{
-		df_textures[ndx] = basename;
+		if(texturenames[i] == entry->basename)
+			break;
+	}
+	if(i==numtextures)
+	{
+		if(numtextures==MAXTEXTURES)
+			return;
+		texturenames[numtextures++] = entry->basename;
+printf("Texture%d:%s\n", i, entry->basename.c_str());
+	}
+	if(ndx>=0 && ndx<TCOUNT && df_textures[ndx] != i)
+	{
+		df_textures[ndx] = i;
 		df_textures_dirty = 1;
 	}
 }
@@ -217,17 +233,9 @@ void dumpframe_textures(void)
 	df_textures_dirty = 0;
 	if(!dumpframefile)
 		return;
-	int total = 0;
-	int i;
-	for(i=0;i<TCOUNT;++i)
-		total += df_textures[i].size() + 1;
 	write4c("text");
-	write32(total);
-	for(i=0;i<TCOUNT;++i)
-	{
-		fwrite(df_textures[i].c_str(), df_textures[i].size(), 1, dumpframefile);
-		fputc(0, dumpframefile);
-	}
+	write32(sizeof(df_textures));
+	fwrite(df_textures, sizeof(df_textures), 1, dumpframefile);
 	writepad();
 }
 
@@ -240,8 +248,9 @@ void dumpframestart(void)
 		if(dumpframestate == 1)
 		{
 			for(int i=0;i<TCOUNT;++i)
-				df_textures[i] = "";
+				df_textures[i] = -1;
 			df_textures_dirty = 0;
+			numtextures = 0;
 			memset(&old_vpt, 0, sizeof(old_vpt));
 			memset(&new_vpt, 0, sizeof(new_vpt));
 			memset(&old_spg, 0, sizeof(old_spg));
