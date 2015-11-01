@@ -22,7 +22,6 @@
 
 namespace OGL
 {
-	extern void dumpframe_texturepath(std::string pathname);
 	extern void dumpframe_bindtexture(int ndx, TextureCache::TCacheEntryBase* entry);
 	extern int dumpframestate;
 }
@@ -222,8 +221,6 @@ void TextureCache::DumpTexture(TCacheEntryBase* entry, std::string basename, uns
 {
 	std::string szDir = File::GetUserPath(D_DUMPTEXTURES_IDX) +
 		SConfig::GetInstance().m_LocalCoreStartupParameter.m_strUniqueID;
-
-	OGL::dumpframe_texturepath(szDir);
 
 	// make sure that the directory exists
 	if (!File::Exists(szDir) || !File::IsDirectory(szDir))

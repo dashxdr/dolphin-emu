@@ -177,7 +177,6 @@ static int df_textures[TCOUNT];
 #define MAXTEXTURES 1024
 static std::string texturenames[MAXTEXTURES];
 static int numtextures = 0;
-static std::string texturepath = "";
 int df_textures_dirty = 0;
 void writepad(void)
 {
@@ -242,11 +241,6 @@ void dumpframe_bindtexture(int ndx, TextureCache::TCacheEntryBase *entry)
 	}
 }
 
-void dumpframe_texturepath(std::string pathname)
-{
-	texturepath = pathname;
-}
-
 void dumpframe_textures(void)
 {
 	if(!df_textures_dirty)
@@ -284,14 +278,6 @@ void dumpframestart(void)
 			dumpframefile = fopen(tempname, "wb");
 			printf("Dumping frame to file %s\n", tempname);
 			write4c("Ddv0");
-			int len = texturepath.size();
-			if(len>0)
-			{
-				write4c("tpth");
-				write32(len+1);
-				fwrite(texturepath.c_str(), len+1, 1, dumpframefile);
-				writepad();
-			}
 		} else if(dumpframestate == 0)
 		{
 			fclose(dumpframefile);
