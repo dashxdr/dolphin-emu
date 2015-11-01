@@ -212,7 +212,28 @@ void dumpframe_bindtexture(int ndx, TextureCache::TCacheEntryBase *entry)
 		if(numtextures==MAXTEXTURES)
 			return;
 		texturenames[numtextures++] = entry->basename;
-printf("Texture%d:%s\n", i, entry->basename.c_str());
+		char tname[1024];
+		snprintf(tname, sizeof(tname), "/tmp/%s_%d.png", entry->basename.c_str(), getpid());
+		entry->Save(tname, 0);
+		int fd = open(tname, O_RDONLY);
+		if(fd>=0)
+		{
+			char temp[1024];
+			long len = lseek(fd, 0l, SEEK_END);
+			lseek(fd, 0l, SEEK_SET);
+			write4c("imag");
+			write32(len);
+			while(len>0)
+			{
+				int got = read(fd, temp, sizeof(temp));
+				if(got<=0) break;
+				fwrite(temp, 1, got, dumpframefile);
+				len-=got;
+			}
+			writepad();
+			close(fd);
+		}
+		unlink(tname);
 	}
 	if(ndx>=0 && ndx<TCOUNT && df_textures[ndx] != i)
 	{
