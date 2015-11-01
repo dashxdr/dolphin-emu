@@ -546,7 +546,7 @@ TextureCache::TCacheEntryBase* TextureCache::Load(const u32 stage)
 	entry->Load(width, height, expandedWidth, 0);
 
 	std::string basename = "";
-	if (g_ActiveConfig.bDumpTextures && !hires_tex)
+	if (!hires_tex)
 	{
 		entry->basename = basename = HiresTexture::GenBaseName(
 			src_data, texture_size,
@@ -555,7 +555,7 @@ TextureCache::TCacheEntryBase* TextureCache::Load(const u32 stage)
 			texformat, use_mipmaps,
 			true
 		);
-		DumpTexture(entry, basename, 0);
+		if(g_ActiveConfig.bDumpTextures) DumpTexture(entry, basename, 0);
 	}
 
 	if (hires_tex)
