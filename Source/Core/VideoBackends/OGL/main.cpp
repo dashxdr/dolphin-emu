@@ -273,8 +273,14 @@ void dumpframestart(void)
 			dumpframeconstants=1;
 			dumpedshadercount=0;
 			char tempname[64];
-			snprintf(tempname, sizeof(tempname), "/tmp/dumpframe%04d.bin",
-				dumpframecount++);
+			for(;;)
+			{
+				snprintf(tempname, sizeof(tempname), "/tmp/dumpframe%04d.bin",
+					dumpframecount++);
+				int fd = open(tempname, O_RDONLY);
+				if(fd<0) break;
+				close(fd);
+			}
 			dumpframefile = fopen(tempname, "wb");
 			printf("Dumping frame to file %s\n", tempname);
 			write4c("Ddv0");
